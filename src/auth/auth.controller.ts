@@ -1,8 +1,10 @@
-import { Body, Controller, ForbiddenException, Post } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
+import { User } from 'generated/prisma/browser';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -23,5 +25,12 @@ export class AuthController {
     return {
       token: await this.usersService.createToken(user.id)
     }
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard('bearer'))
+  me(@Request() req) {
+    const user = req.user as User;
+    return user;
   }
 }
